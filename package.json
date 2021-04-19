@@ -1,0 +1,13 @@
+{
+  "name": "minify_task",
+  "version": "0.0.2",
+  "license": "Apache-2.0",
+  "author": "Dan dan1005",
+
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-htmlmin": "5.0.1",
+    "gulp-terser": "2.0.1"
+  }
+}
