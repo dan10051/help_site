@@ -19,9 +19,8 @@ pipelines:
            - npm install
            - npm update
            - npm install -g gulp
-           - gulp treser-js
-           - gulp minify-css
-           - gulp minify-html
+           - gulp default
+           - gulp mountRelease
 
            - pipe: atlassian/rsync-deploy:0.4.4
              variables:
@@ -56,9 +55,9 @@ pipelines:
            - npm install
            - npm update
            - npm install -g gulp
-           - gulp treser-js
-           - gulp minify-css
-           - gulp minify-html
+           - gulp default
+           - gulp mountRelease
+
 
            - pipe: atlassian/rsync-deploy:0.4.4
              variables:
@@ -95,9 +94,9 @@ pipelines:
          - npm install
          - npm update
          - npm install -g gulp
-         - gulp treser-js
-         - gulp minify-css
-         - gulp minify-html
+         - gulp default
+         - gulp mountRelease
+
 
          - pipe: atlassian/rsync-deploy:0.4.4
            variables:
