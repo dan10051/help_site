@@ -1,0 +1,114 @@
+image: node:14.17.0
+
+pipelines:
+
+  branches:
+    experimental:               # Exp deploy
+      - step:
+         name: Deploy EXP Help to AWS Exp environment
+         caches:
+           - node
+         script:
+           - sed -i "s/%DB_HOST%/$DB_HOST_EXP/" api/config.php
+           - sed -i "s/%DB_NAME%/$DB_NAME_EXP/" api/config.php
+           - sed -i "s/%DB_USER%/$DB_USER_EXP/" api/config.php
+           - sed -i "s/%DB_PASS%/$DB_PASS_EXP/" api/config.php
+           - sed -i "s/DEBUGMODE\", false/DEBUGMODE\", $DEBUGMODE/" api/config.php
+           - sed -i "s/SESSION_TTL', '1500/SESSION_TTL', '$SESSION_TTL/" api/config.php
+           - sed -i "s|DOCUMENT_SUBROOT\", \"|DOCUMENT_SUBROOT\", \"$DOCUMENT_SUBROOT|g" api/sys.config.php
+           - npm install
+           - npm update
+           - npm install -g gulp
+           - gulp default
+           - gulp mountRelease
+
+           - pipe: atlassian/rsync-deploy:0.4.4
+             variables:
+               USER: '$DEPLOY_USER_EXP'
+               SERVER: '$DEPLOY_SERVER_EXP'
+               REMOTE_PATH: '$DEPLOY_REMOTE_PATH_EXP'
+               LOCAL_PATH: '${BITBUCKET_CLONE_DIR}/'
+               EXTRA_ARGS: '--exclude-from=.bitbucket-ignore'
+
+           - pipe: atlassian/aws-cloudfront-invalidate:0.5.0
+             variables:
+               AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+               AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+               AWS_DEFAULT_REGION: us-west-2
+               DISTRIBUTION_ID: 'EFDM6G0RE4OG3'
+
+
+
+    stage:
+      - step:                        # Stage deploy
+         name: Deploy STAGE Help site to AWS Stage environment
+         caches:
+           - node
+         script:
+           - sed -i "s/%DB_HOST%/$DB_HOST_STAGE/" api/config.php
+           - sed -i "s/%DB_NAME%/$DB_NAME_STAGE/" api/config.php
+           - sed -i "s/%DB_USER%/$DB_USER_STAGE/" api/config.php
+           - sed -i "s/%DB_PASS%/$DB_PASS_STAGE/" api/config.php
+           - sed -i "s/DEBUGMODE\", false/DEBUGMODE\", $DEBUGMODE/" api/config.php
+           - sed -i "s/SESSION_TTL', '1500/SESSION_TTL', '$SESSION_TTL/" api/config.php
+           - sed -i "s|DOCUMENT_SUBROOT\", \"|DOCUMENT_SUBROOT\", \"$DOCUMENT_SUBROOT|g" api/sys.config.php
+           - npm install
+           - npm update
+           - npm install -g gulp
+           - gulp default
+           - gulp mountRelease
+
+
+           - pipe: atlassian/rsync-deploy:0.4.4
+             variables:
+               USER: '$DEPLOY_USER_STAGE'
+               SERVER: '$DEPLOY_SERVER_STAGE'
+               REMOTE_PATH: '$DEPLOY_REMOTE_PATH_STAGE'
+               LOCAL_PATH: '${BITBUCKET_CLONE_DIR}/'
+               EXTRA_ARGS: '--exclude-from=.bitbucket-ignore'
+
+           - pipe: atlassian/aws-cloudfront-invalidate:0.5.0
+             variables:
+               AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+               AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+               AWS_DEFAULT_REGION: us-west-2
+               DISTRIBUTION_ID: 'E3NULE5VULOG3H'
+
+
+
+  custom:
+    deployment-to-Stable-Manual: # Another display name
+    - step:                        # Prod deploy
+       name: Deploy STABLE to AWS Help Prod environment MANUALY
+       deployment: stable
+       caches:
+         - node
+       script:
+         - sed -i "s/%DB_HOST%/$DB_HOST_STABLE/" api/config.php
+         - sed -i "s/%DB_NAME%/$DB_NAME_STABLE/" api/config.php
+         - sed -i "s/%DB_USER%/$DB_USER_STABLE/" api/config.php
+         - sed -i "s/%DB_PASS%/$DB_PASS_STABLE/" api/config.php
+         - sed -i "s/DEBUGMODE\", false/DEBUGMODE\", $DEBUGMODE/" api/config.php
+         - sed -i "s/SESSION_TTL', '1500/SESSION_TTL', '$SESSION_TTL/" api/config.php
+         - sed -i "s|DOCUMENT_SUBROOT\", \"|DOCUMENT_SUBROOT\", \"$DOCUMENT_SUBROOT|g" api/sys.config.php
+         - npm install
+         - npm update
+         - npm install -g gulp
+         - gulp default
+         - gulp mountRelease
+
+
+         - pipe: atlassian/rsync-deploy:0.4.4
+           variables:
+             USER: '$DEPLOY_USER_STABLE'
+             SERVER: '$DEPLOY_SERVER_STABLE'
+             REMOTE_PATH: '$DEPLOY_REMOTE_PATH_STABLE'
+             LOCAL_PATH: '${BITBUCKET_CLONE_DIR}/'
+             EXTRA_ARGS: '--exclude-from=.bitbucket-ignore'
+
+         - pipe: atlassian/aws-cloudfront-invalidate:0.5.0
+           variables:
+             AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+             AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+             AWS_DEFAULT_REGION: us-west-2
+             DISTRIBUTION_ID: 'E2F0SM5U1VPLLT'
